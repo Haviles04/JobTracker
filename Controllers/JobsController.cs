@@ -24,14 +24,17 @@ namespace JobTracker.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
         {
-            return await _context.Jobs.ToListAsync();
+            return await _context.Jobs.Include(j=>j.ProjectManager).ToListAsync();
         }
 
         // GET: api/Jobs/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Job>> GetJob(long id)
         {
-            var job = await _context.Jobs.Include(j => j.ProjectManager).Include(j=>j.Employees).FirstOrDefaultAsync(j => j.Id == id);
+            var job = await _context.Jobs
+                .Include(j => j.ProjectManager)
+                .Include(j => j.Employees)
+                .FirstOrDefaultAsync(j => j.Id == id);
 
             if (job == null)
             {
@@ -79,6 +82,23 @@ namespace JobTracker.Controllers
         {
             try
             {
+                var projectManager = await _context.Employees.FindAsync(job.ProjectManagerId);
+                if (projectManager == null)
+                {
+                    return BadRequest($"Project Manager with Id {job.ProjectManagerId} does not exist.");
+                }
+
+                var validEmployees = new List<Employee>();
+                foreach (var employeeDTO in job.Employees)
+                {
+                    var employee = await _context.Employees.FindAsync(employeeDTO.Id);
+                    if (employee == null)
+                    {
+                        return BadRequest($"Employee with Id {employeeDTO.Id} does not exist.");
+                    }
+                    validEmployees.Add(employee);
+                }
+                job.Employees = validEmployees;
                 _context.Jobs.Add(job);
                 await _context.SaveChangesAsync();
 

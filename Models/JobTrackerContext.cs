@@ -17,12 +17,6 @@ namespace JobTracker.Models
                 .HasForeignKey(j => j.ProjectManagerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder
-                .Entity<Job>()
-                .HasMany(j => j.Employees)
-                .WithMany()
-                .UsingEntity(j => j.ToTable("JobEmployees"));
-
             base.OnModelCreating(modelBuilder);
         }
     }
