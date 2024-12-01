@@ -29,16 +29,29 @@ namespace JobTracker.Controllers
 
         // GET: api/Employees/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Employee>> GetEmployee(long id)
+        public async Task<ActionResult<EmployeeDTO>> GetEmployee(long id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _context.Employees.Include(e => e.Jobs).FirstOrDefaultAsync(j => j.Id == id);
 
             if (employee == null)
             {
                 return NotFound();
             }
 
-            return employee;
+            var employeeDTO = new EmployeeDTO
+            {
+                Id = employee.Id,
+                Name = employee.Name,
+                Title = employee.Title,
+                Jobs = employee.Jobs.Select(j => new JobDTO
+                {
+                    Id = j.Id,
+                    JobNumber = j.JobNumber,
+                    Location = j.Location,
+                }).ToList()
+            };
+
+            return Ok(employeeDTO);
         }
 
         // PUT: api/Employees/5

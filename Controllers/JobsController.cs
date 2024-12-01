@@ -29,7 +29,7 @@ namespace JobTracker.Controllers
 
         // GET: api/Jobs/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Job>> GetJob(long id)
+        public async Task<ActionResult<JobDTO>> GetJob(long id)
         {
             var job = await _context.Jobs
                 .Include(j => j.ProjectManager)
@@ -41,7 +41,25 @@ namespace JobTracker.Controllers
                 return NotFound();
             }
 
-            return job;
+            JobDTO jobDTO = new()
+            {
+                Id = job.Id,
+                JobNumber = job.JobNumber,
+                Location = job.Location,
+                ProjectManager = new EmployeeDTO
+                {
+                    Id = job.ProjectManager.Id,
+                    Name = job.ProjectManager.Name,
+                },
+                Employees = job.Employees.Select(e => new EmployeeDTO
+                {
+                    Id = e.Id,
+                    Name = e.Name
+                }).ToList()
+            };
+
+
+            return jobDTO;
         }
 
         // PUT: api/Jobs/5
@@ -78,7 +96,7 @@ namespace JobTracker.Controllers
         // POST: api/Jobs
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Job>> PostJob(Job job)
+        public async Task<ActionResult<Job>> CreateJob(JobRequest job)
         {
             try
             {
@@ -88,21 +106,46 @@ namespace JobTracker.Controllers
                     return BadRequest($"Project Manager with Id {job.ProjectManagerId} does not exist.");
                 }
 
-                var validEmployees = new List<Employee>();
-                foreach (var employeeDTO in job.Employees)
+                var employees = await _context.Employees
+                  .Where(e => job.Employees.Contains(e.Id))
+                  .ToListAsync();
+
+                if(job.Employees.Count != employees.Count)
                 {
-                    var employee = await _context.Employees.FindAsync(employeeDTO.Id);
-                    if (employee == null)
-                    {
-                        return BadRequest($"Employee with Id {employeeDTO.Id} does not exist.");
-                    }
-                    validEmployees.Add(employee);
+                    return BadRequest("One of the employee Ids is invalid");
                 }
-                job.Employees = validEmployees;
-                _context.Jobs.Add(job);
+
+                var newJob = new Job
+                {
+                    JobNumber = job.JobNumber,
+                    Location = job.Location,
+                    ProjectManagerId = job.ProjectManagerId,
+                    ProjectManager = projectManager,
+                    Employees = employees
+                };
+
+                _context.Jobs.Add(newJob);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetJob", new { id = job.Id }, job);
+                JobDTO jobDTO = new()
+                {
+                    Id = job.Id,
+                    JobNumber = newJob.JobNumber,
+                    Location = newJob.Location,
+                    ProjectManager = new EmployeeDTO
+                    {
+                        Id = newJob.ProjectManager.Id,
+                        Name = newJob.ProjectManager.Name
+                    },
+                    Employees = newJob.Employees.Select(e => new EmployeeDTO
+                    {
+                        Id = e.Id,
+                        Name = e.Name
+                    }).ToList()
+                };
+     
+
+                return CreatedAtAction("GetJob", new { id = newJob.Id }, jobDTO);
             }
             catch (Exception e)
             {
