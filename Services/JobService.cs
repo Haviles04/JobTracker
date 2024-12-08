@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JobTracker.Services
 {
-    public class JobsService(JobTrackerContext context)
+    public class JobService(JobTrackerContext context)
     {
         private readonly JobTrackerContext _context = context;
 

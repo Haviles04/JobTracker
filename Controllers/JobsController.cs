@@ -7,9 +7,9 @@ namespace JobTracker.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class JobsController(JobsService jobService) : ControllerBase
+    public class JobsController(JobService jobService) : ControllerBase
     {
-        private readonly JobsService _jobService = jobService;
+        private readonly JobService _jobService = jobService;
 
         // GET: api/Jobs
         [HttpGet]
@@ -47,7 +47,8 @@ namespace JobTracker.Controllers
             {
                 return BadRequest(e.Message);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 return StatusCode(500, $"Internal Server Error {e.Message}");
             }
         }
