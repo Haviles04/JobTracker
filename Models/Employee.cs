@@ -18,7 +18,15 @@ namespace JobTracker.Models
         public long Id { get; set; }
         public required string Name { get; set; }
         public string? Title { get; set; }
-        public List<JobDTO>? Jobs { get; set; }
+        public List<EmployeeJobDTO>? Jobs { get; set; }
+    }
+
+    public class EmployeeJobDTO
+    {
+        public long Id { get; set; }
+        public int JobNumber { get; set; }
+        public string? Location { get; set; }
     }
 }
+
 

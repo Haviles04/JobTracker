@@ -34,6 +34,7 @@ namespace JobTracker.Controllers
             var job = await _context.Jobs
                 .Include(j => j.ProjectManager)
                 .Include(j => j.Employees)
+                .Include(j => j.Tools)
                 .FirstOrDefaultAsync(j => j.Id == id);
 
             if (job == null)
@@ -46,16 +47,19 @@ namespace JobTracker.Controllers
                 Id = job.Id,
                 JobNumber = job.JobNumber,
                 Location = job.Location,
-                ProjectManager = new EmployeeDTO
+                ProjectManager = job.ProjectManager != null ? new JobEmployeeDTO
                 {
                     Id = job.ProjectManager.Id,
                     Name = job.ProjectManager.Name,
-                },
-                Employees = job.Employees.Select(e => new EmployeeDTO
+                    Title = job.ProjectManager.Title,
+                } : null,
+                Employees = job.Employees?.Select(e => new JobEmployeeDTO
                 {
                     Id = e.Id,
-                    Name = e.Name
-                }).ToList()
+                    Name = e.Name,
+                    Title = e.Title
+                }).ToList(),
+                Tools = job.Tools?.ToList()
             };
 
 
@@ -121,7 +125,8 @@ namespace JobTracker.Controllers
                     Location = job.Location,
                     ProjectManagerId = job.ProjectManagerId,
                     ProjectManager = projectManager,
-                    Employees = employees
+                    Employees = employees,
+                    Tools = job.Tools
                 };
 
                 _context.Jobs.Add(newJob);
@@ -129,18 +134,19 @@ namespace JobTracker.Controllers
 
                 JobDTO jobDTO = new()
                 {
-                    Id = job.Id,
+                    Id = newJob.Id,
                     JobNumber = newJob.JobNumber,
                     Location = newJob.Location,
-                    ProjectManager = new EmployeeDTO
+                    ProjectManager = newJob.ProjectManager != null ? new JobEmployeeDTO
                     {
                         Id = newJob.ProjectManager.Id,
                         Name = newJob.ProjectManager.Name
-                    },
-                    Employees = newJob.Employees.Select(e => new EmployeeDTO
+                    } : null,
+                    Employees = newJob.Employees?.Select(e => new JobEmployeeDTO
                     {
                         Id = e.Id,
-                        Name = e.Name
+                        Name = e.Name,
+                        Title = e.Title
                     }).ToList()
                 };
      

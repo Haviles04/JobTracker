@@ -43,7 +43,7 @@ namespace JobTracker.Controllers
                 Id = employee.Id,
                 Name = employee.Name,
                 Title = employee.Title,
-                Jobs = employee.Jobs.Select(j => new JobDTO
+                Jobs = employee?.Jobs?.Select(j => new EmployeeJobDTO
                 {
                     Id = j.Id,
                     JobNumber = j.JobNumber,

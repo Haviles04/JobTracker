@@ -8,8 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<JobTrackerContext>(opt => opt.UseInMemoryDatabase("JobTrackerDb"));
 
-
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
