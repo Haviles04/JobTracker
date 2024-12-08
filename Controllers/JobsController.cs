@@ -24,7 +24,7 @@ namespace JobTracker.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
         {
-            return await _context.Jobs.Include(j=>j.ProjectManager).ToListAsync();
+            return await _context.Jobs.Include(j => j.ProjectManager).ToListAsync();
         }
 
         // GET: api/Jobs/5
@@ -114,7 +114,7 @@ namespace JobTracker.Controllers
                   .Where(e => job.Employees.Contains(e.Id))
                   .ToListAsync();
 
-                if(job.Employees.Count != employees.Count)
+                if (job.Employees.Count != employees.Count)
                 {
                     return BadRequest("One of the employee Ids is invalid");
                 }
@@ -149,7 +149,7 @@ namespace JobTracker.Controllers
                         Title = e.Title
                     }).ToList()
                 };
-     
+
 
                 return CreatedAtAction("GetJob", new { id = newJob.Id }, jobDTO);
             }
