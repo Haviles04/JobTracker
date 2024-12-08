@@ -1,100 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JobTracker.Models;
+using JobTracker.Services;
 
 namespace JobTracker.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class JobsController : ControllerBase
+    public class JobsController(JobsService jobService) : ControllerBase
     {
-        private readonly JobTrackerContext _context;
-
-        public JobsController(JobTrackerContext context)
-        {
-            _context = context;
-        }
+        private readonly JobsService _jobService = jobService;
 
         // GET: api/Jobs
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
         {
-            return await _context.Jobs.Include(j => j.ProjectManager).ToListAsync();
+            var jobs = await _jobService.GetAllJobsAsync();
+            return Ok(jobs);
         }
 
         // GET: api/Jobs/5
         [HttpGet("{id}")]
         public async Task<ActionResult<JobDTO>> GetJob(long id)
         {
-            var job = await _context.Jobs
-                .Include(j => j.ProjectManager)
-                .Include(j => j.Employees)
-                .Include(j => j.Tools)
-                .FirstOrDefaultAsync(j => j.Id == id);
+            var jobDTO = await _jobService.GetJobAsync(id);
 
-            if (job == null)
+            if (jobDTO == null)
             {
-                return NotFound();
+                return NotFound($"Job with Id {id} not found.");
             }
 
-            JobDTO jobDTO = new()
-            {
-                Id = job.Id,
-                JobNumber = job.JobNumber,
-                Location = job.Location,
-                ProjectManager = job.ProjectManager != null ? new JobEmployeeDTO
-                {
-                    Id = job.ProjectManager.Id,
-                    Name = job.ProjectManager.Name,
-                    Title = job.ProjectManager.Title,
-                } : null,
-                Employees = job.Employees?.Select(e => new JobEmployeeDTO
-                {
-                    Id = e.Id,
-                    Name = e.Name,
-                    Title = e.Title
-                }).ToList(),
-                Tools = job.Tools?.ToList()
-            };
-
-
-            return jobDTO;
+            return Ok(jobDTO);
         }
 
         // PUT: api/Jobs/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutJob(long id, Job job)
+        public async Task<IActionResult> PutJob(long id, JobRequest job)
         {
-            if (id != job.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(job).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _jobService.UpdateJob(id, job);
+                return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (ArgumentException e)
             {
-                if (!JobExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(e.Message);
             }
-
-            return NoContent();
+            catch (Exception e) {
+                return StatusCode(500, $"Internal Server Error {e.Message}");
+            }
         }
 
         // POST: api/Jobs
@@ -104,80 +59,35 @@ namespace JobTracker.Controllers
         {
             try
             {
-                var projectManager = await _context.Employees.FindAsync(job.ProjectManagerId);
-                if (projectManager == null)
-                {
-                    return BadRequest($"Project Manager with Id {job.ProjectManagerId} does not exist.");
-                }
-
-                var employees = await _context.Employees
-                  .Where(e => job.Employees.Contains(e.Id))
-                  .ToListAsync();
-
-                if (job.Employees.Count != employees.Count)
-                {
-                    return BadRequest("One of the employee Ids is invalid");
-                }
-
-                var newJob = new Job
-                {
-                    JobNumber = job.JobNumber,
-                    Location = job.Location,
-                    ProjectManagerId = job.ProjectManagerId,
-                    ProjectManager = projectManager,
-                    Employees = employees,
-                    Tools = job.Tools
-                };
-
-                _context.Jobs.Add(newJob);
-                await _context.SaveChangesAsync();
-
-                JobDTO jobDTO = new()
-                {
-                    Id = newJob.Id,
-                    JobNumber = newJob.JobNumber,
-                    Location = newJob.Location,
-                    ProjectManager = newJob.ProjectManager != null ? new JobEmployeeDTO
-                    {
-                        Id = newJob.ProjectManager.Id,
-                        Name = newJob.ProjectManager.Name
-                    } : null,
-                    Employees = newJob.Employees?.Select(e => new JobEmployeeDTO
-                    {
-                        Id = e.Id,
-                        Name = e.Name,
-                        Title = e.Title
-                    }).ToList()
-                };
-
-
-                return CreatedAtAction("GetJob", new { id = newJob.Id }, jobDTO);
+                var newJob = await _jobService.CreateJob(job);
+                return CreatedAtAction("GetJob", new { id = newJob.Id }, newJob);
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
             }
             catch (Exception e)
             {
-                return StatusCode(500, $"Internal Server Error: {e.Message}");
+                return StatusCode(500, $"Internal Server Error{e.Message}");
             }
         }
 
-        // DELETE: api/Jobs/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteJob(long id)
-        {
-            var job = await _context.Jobs.FindAsync(id);
-            if (job == null)
-            {
-                return NotFound();
-            }
+        //// DELETE: api/Jobs/5
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteJob(long id)
+        //{
+        //    var job = await _context.Jobs.FindAsync(id);
+        //    if (job == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _context.Jobs.Remove(job);
-            await _context.SaveChangesAsync();
+        //    _context.Jobs.Remove(job);
+        //    await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
-        private bool JobExists(long id)
-        {
-            return _context.Jobs.Any(e => e.Id == id);
-        }
+
     }
 }
