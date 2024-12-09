@@ -1,4 +1,5 @@
 using JobTracker.Models;
+using JobTracker.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<JobTrackerContext>(opt => opt.UseInMemoryDatabase("JobTrackerDb"));
+builder.Services.AddScoped<JobService>();
+builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
