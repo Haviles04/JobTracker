@@ -1,57 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JobTracker.Models;
+using JobTracker.Services;
 
 namespace JobTracker.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeesController : ControllerBase
+    public class EmployeesController(EmployeeService employeeService) : ControllerBase
     {
-        private readonly JobTrackerContext _context;
-
-        public EmployeesController(JobTrackerContext context)
-        {
-            _context = context;
-        }
-
+        private readonly EmployeeService _employeeService = employeeService;
         // GET: api/Employees
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
+        public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetEmployees()
         {
-            return await _context.Employees.ToListAsync();
+            try
+            {
+                var employees = await _employeeService.GetAllEmployees();
+                return Ok(employees);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, $"Internal Server Error {e.Message}");
+            }
         }
 
         // GET: api/Employees/5
         [HttpGet("{id}")]
         public async Task<ActionResult<EmployeeDTO>> GetEmployee(long id)
         {
-            var employee = await _context.Employees.Include(e => e.Jobs).FirstOrDefaultAsync(j => j.Id == id);
-
-            if (employee == null)
+            try
             {
-                return NotFound();
+                var employee = await _employeeService.GetEmployee(id);
+                return Ok(employee);
             }
-
-            var employeeDTO = new EmployeeDTO
+            catch (ArgumentException e)
             {
-                Id = employee.Id,
-                Name = employee.Name,
-                Title = employee.Title,
-                Jobs = employee?.Jobs?.Select(j => new EmployeeJobDTO
-                {
-                    Id = j.Id,
-                    JobNumber = j.JobNumber,
-                    Location = j.Location,
-                }).ToList()
-            };
-
-            return Ok(employeeDTO);
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, $"Internal Server Error {e.Message}");
+            }
         }
 
         // PUT: api/Employees/5
@@ -59,29 +49,19 @@ namespace JobTracker.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEmployee(long id, Employee employee)
         {
-            if (id != employee.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(employee).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _employeeService.UpdateEmployee(id, employee);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (ArgumentException e)
             {
-                if (!EmployeeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(e.Message);
             }
-
+            catch(Exception e)
+            {
+                return StatusCode(500, $"Interal Server Error {e.Message}");
+            }
+                
             return NoContent();
         }
 
@@ -90,31 +70,25 @@ namespace JobTracker.Controllers
         [HttpPost]
         public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
         {
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
+            var newEmployee = await _employeeService.CreateEmployee(employee);
 
-            return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
+            return CreatedAtAction("GetEmployee", new { id = newEmployee.Id }, newEmployee);
         }
 
-        // DELETE: api/Employees/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEmployee(long id)
-        {
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
+        //// DELETE: api/Employees/5
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteEmployee(long id)
+        //{
+        //    var employee = await _context.Employees.FindAsync(id);
+        //    if (employee == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
+        //    _context.Employees.Remove(employee);
+        //    await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
-
-        private bool EmployeeExists(long id)
-        {
-            return _context.Employees.Any(e => e.Id == id);
-        }
+        //    return NoContent();
+        //}
     }
 }
