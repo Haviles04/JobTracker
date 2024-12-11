@@ -9,6 +9,7 @@ namespace JobTracker.Data
 
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Job> Jobs { get; set; }
+        public DbSet<Tool> Tools { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,7 +23,6 @@ namespace JobTracker.Data
                 .HasMany(j => j.Employees)
                 .WithMany(e => e.Jobs)
                 .UsingEntity(j => j.ToTable("EmployeeJobs"));
-
 
             base.OnModelCreating(modelBuilder);
         }

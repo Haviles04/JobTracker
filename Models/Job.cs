@@ -21,11 +21,11 @@ namespace JobTracker.Models
     public class JobRequest
     {
         public long Id { get; set; }
-        public int JobNumber { get; set; }
-        public long ProjectManagerId { get; set; }
-        public string Location { get; set; }
-        public List<long> Employees { get; set; }
-        public List<Tool> Tools { get; set; }
+        public required int JobNumber { get; set; }
+        public required long ProjectManagerId { get; set; }
+        public required string Location { get; set; }
+        public List<long>? Employees { get; set; }
+        public List<Tool>? Tools { get; set; }
     }
 
     public class JobDTO
