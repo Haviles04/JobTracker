@@ -25,7 +25,7 @@ namespace JobTracker.Models
         public required long ProjectManagerId { get; set; }
         public required string Location { get; set; }
         public List<long>? Employees { get; set; }
-        public List<Tool>? Tools { get; set; }
+        public List<long>? Tools { get; set; }
     }
 
     public class JobDTO

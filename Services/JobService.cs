@@ -26,6 +26,7 @@ namespace JobTracker.Services
             var job = await _context.Jobs
                         .Include(j => j.ProjectManager)
                         .Include(j => j.Employees)
+                        .Include(j => j.Tools)
                         .FirstOrDefaultAsync(j => j.Id == id);
 
             if (job == null)
@@ -51,7 +52,8 @@ namespace JobTracker.Services
                     Id = e.Id,
                     Name = e.Name,
                     Title = e.Title
-                }).ToList()
+                }).ToList(),
+                Tools =  job.Tools
             };
         }
 
@@ -63,13 +65,19 @@ namespace JobTracker.Services
                 throw new ArgumentException("Invalid Project Manager ID");
             }
 
-            var employees = await _context.Employees
+            var employees = job.Employees is not null ? await _context.Employees
                 .Where(e => job.Employees.Contains(e.Id))
-                .ToListAsync();
+                .ToListAsync() : null;
 
-            if (job.Employees.Count != employees.Count)
+            if (job.Employees?.Count != employees?.Count)
             {
                 throw new ArgumentException("One of the employee Ids is invalid");
+            }
+
+            var tools = job.Tools is not null ? await _context.Tools.Where(t => job.Tools.Contains(t.Id)).ToListAsync() : null;
+            if (job.Tools?.Count != tools?.Count)
+            {
+                throw new ArgumentException("One of the tool Ids is invalid");
             }
 
             var newJob = new Job
@@ -79,7 +87,7 @@ namespace JobTracker.Services
                 ProjectManagerId = job.ProjectManagerId,
                 ProjectManager = projectManager,
                 Employees = employees,
-                Tools = job.Tools
+                Tools = tools
             };
 
             _context.Jobs.Add(newJob);
