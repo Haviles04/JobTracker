@@ -11,6 +11,7 @@ builder.Services.AddDbContext<JobTrackerContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<JobService>();
 builder.Services.AddScoped<EmployeeService>();
+builder.Services.AddScoped<ToolService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
