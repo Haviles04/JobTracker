@@ -1,14 +1,15 @@
-﻿using JobTracker.Models;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using JobTracker.Data;
+using JobTracker.Models;
+using JobTracker.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace JobTracker.Services
 {
-    public class JobService(JobTrackerContext context)
+    public class JobService(JobTrackerContext context): IJobService
     {
         private readonly JobTrackerContext _context = context;
 
-        private bool JobExists(long id)
+        public bool JobExists(long id)
         {
             return _context.Jobs.Any(e => e.Id == id);
         }

@@ -5,14 +5,6 @@ using System.Text.Json.Serialization;
 namespace JobTracker.Models
 {
 
-    public class Tool
-    {
-        public long Id { get; set; }
-        [Required]
-        [StringLength(50)]
-        public required string Name { get; set; }
-        public required int Quantity { get; set; }
-    }
     public class Job
     {
         [Key]

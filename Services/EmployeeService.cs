@@ -1,14 +1,15 @@
-﻿using JobTracker.Models;
-using Microsoft.Build.Framework;
+﻿using JobTracker.Data;
+using JobTracker.Models;
+using JobTracker.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace JobTracker.Services
 {
-    public class EmployeeService(JobTrackerContext context)
+    public class EmployeeService(JobTrackerContext context): IEmployeeService
     {
         private readonly JobTrackerContext _context = context;
 
-        private bool EmployeeExists(long id)
+        public bool EmployeeExists(long id)
         {
             return _context.Employees.Any(e => e.Id == id);
         }

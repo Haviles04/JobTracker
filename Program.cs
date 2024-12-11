@@ -1,4 +1,4 @@
-using JobTracker.Models;
+using JobTracker.Data;
 using JobTracker.Services;
 using Microsoft.EntityFrameworkCore;
 

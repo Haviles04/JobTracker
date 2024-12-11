@@ -1,12 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using JobTracker.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace JobTracker.Models
+namespace JobTracker.Data
 {
-    public class JobTrackerContext : DbContext 
+    public class JobTrackerContext : DbContext
     {
-        public JobTrackerContext(DbContextOptions<JobTrackerContext> options) : base(options) { }  
+        public JobTrackerContext(DbContextOptions<JobTrackerContext> options) : base(options) { }
 
-        public DbSet<Employee> Employees { get; set; }   
+        public DbSet<Employee> Employees { get; set; }
         public DbSet<Job> Jobs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
