@@ -9,6 +9,6 @@ namespace JobTracker.Models
         [StringLength(50)]
         public required string Name { get; set; }
         [DefaultValue(false)]
-        public required bool NeedsRepair {get; set;}
+        public bool NeedsRepair {get; set;}
     }
 }
