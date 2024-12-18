@@ -1,12 +1,14 @@
 ﻿using JobTracker.Interfaces;
 using JobTracker.Models;
 using JobTracker.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobTracker.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ToolsController(ToolService toolService) : ControllerBase
     {
         private readonly ToolService _toolService = toolService;

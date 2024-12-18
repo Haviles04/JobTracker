@@ -2,11 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using JobTracker.Models;
 using JobTracker.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace JobTracker.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class JobsController(JobService jobService) : ControllerBase
     {
         private readonly JobService _jobService = jobService;
