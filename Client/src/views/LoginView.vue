@@ -8,17 +8,27 @@ const router = useRouter();
 const isAlreadyUser = ref<boolean>(false);
 const email = ref<string>('')
 const password = ref<string>('');
+const errorMessage = ref<string>('');
 
 const handleSubmit = async () => {
-
   const slug: string = isAlreadyUser.value ? 'login' : 'register'
-  const response = await axios.post(`http://localhost:5130/${slug}`, {
-    email:email.value,
-    password: password.value
-  });
-  console.log(response);
-  if (response.status === 200) {
-    router.push('/');
+  try {
+    const response = await axios.post(`http://localhost:5130/${slug}`, {
+      email: email.value,
+      password: password.value
+    })
+
+    if (response.status === 200) {
+      return router.push('/');
+    }
+  }
+  catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      const firstErrorKey = Object.keys(err.response?.data.errors)[0];
+      errorMessage.value = err.response?.data.errors[firstErrorKey][0];
+    } else {
+      errorMessage.value = 'Unexpected Error, please try again';
+    }
   }
 }
 
@@ -54,6 +64,10 @@ const alreadyHaveAccount = computed<string>(() => {
           <button class="block" @click="handleChange">{{ alreadyHaveAccount }}</button>
         </div>
       </form>
+      <div>
+        <p class="text-red-500">{{ errorMessage }}</p> 
+      </div>
     </div>
+    
   </main>
 </template>
