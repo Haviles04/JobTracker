@@ -1,6 +1,7 @@
 {
   "ExpandedNodes": [
     "",
+    "\\Client",
     "\\Server"
   ],
   "SelectedNode": "\\Server\\JobTracker.sln",
