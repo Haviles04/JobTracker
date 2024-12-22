@@ -7,7 +7,6 @@ namespace JobTracker.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class EmployeesController(EmployeeService employeeService) : ControllerBase
     {
         private readonly EmployeeService _employeeService = employeeService;
@@ -55,11 +54,11 @@ namespace JobTracker.Controllers
             {
                 return BadRequest(e.Message);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return StatusCode(500, $"Interal Server Error {e.Message}");
             }
-                
+
             return NoContent();
         }
 

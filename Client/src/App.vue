@@ -1,6 +1,25 @@
 <script setup lang="ts">
+import {onMounted} from 'vue';
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
+
+onMounted(async () => {
+  const response = await fetch('http://localhost:5130/api/employees', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json' // Specify JSON content
+    },
+    body: JSON.stringify({
+    Name: "Henry Aviles",
+    Title: "JIW 40",
+    PayRate: 57
+  })
+  });
+  console.log(response);
+
+  const data = await response.json();
+  console.log(data);
+});
 </script>
 
 <template>

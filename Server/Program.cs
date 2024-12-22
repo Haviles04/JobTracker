@@ -29,7 +29,20 @@ builder.Services.AddScoped<ToolService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Add Frontend Cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173") // Match Vue dev server URL
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
+app.UseCors("AllowFrontend");
 
 app.MapIdentityApi<IdentityUser>();
 if (app.Environment.IsDevelopment())
