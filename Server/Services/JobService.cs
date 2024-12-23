@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JobTracker.Services
 {
-    public class JobService(JobTrackerContext context): IJobService
+    public class JobService(JobTrackerContext context) : IJobService
     {
         private readonly JobTrackerContext _context = context;
 
@@ -14,11 +14,26 @@ namespace JobTracker.Services
             return _context.Jobs.Any(e => e.Id == id);
         }
 
-        public async Task<List<Job>> GetAllJobsAsync()
+        public bool PmExists(long id)
         {
-            return await _context.Jobs
-                .Include(j => j.ProjectManager)
-                .ToListAsync();
+            return _context.Employees.Any(e => e.Id == id);
+        }
+
+        public async Task<List<JobDTO>> GetAllJobsAsync(long ProjectManagerId)
+        {
+            if (!PmExists(ProjectManagerId))
+            {
+                throw new ArgumentException("Invalid Id or Project Manager doesn't exist");
+            }
+
+            var jobs = await _context.Jobs.Where(j => j.ProjectManagerId == ProjectManagerId).ToListAsync();
+
+            return jobs.Select(j => new JobDTO
+            {
+                Id = j.Id,
+                JobNumber = j.JobNumber,
+                Location = j.Location
+            }).ToList();
         }
 
         public async Task<JobDTO?> GetJobAsync(long id)
@@ -53,7 +68,7 @@ namespace JobTracker.Services
                     Name = e.Name,
                     Title = e.Title
                 }).ToList(),
-                Tools =  job.Tools
+                Tools = job.Tools
             };
         }
 
@@ -141,5 +156,9 @@ namespace JobTracker.Services
             return;
         }
 
+        public Task<List<Job>> GetAllJobsAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

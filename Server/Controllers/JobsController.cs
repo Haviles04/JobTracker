@@ -14,9 +14,9 @@ namespace JobTracker.Controllers
 
         // GET: api/Jobs
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Job>>> GetJobs()
+        public async Task<ActionResult<IEnumerable<Job>>> GetJobs(long ProjectManagerId)
         {
-            var jobs = await _jobService.GetAllJobsAsync();
+            var jobs = await _jobService.GetAllJobsAsync(ProjectManagerId);
             return Ok(jobs);
         }
 
