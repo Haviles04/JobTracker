@@ -9,12 +9,12 @@ namespace JobTracker.Services
     {
         private readonly JobTrackerContext _context = context;
 
-        public bool JobExists(long id)
+        private bool JobExists(long id)
         {
             return _context.Jobs.Any(e => e.Id == id);
         }
 
-        public bool PmExists(long id)
+        private bool PmExists(long id)
         {
             return _context.Employees.Any(e => e.Id == id);
         }
