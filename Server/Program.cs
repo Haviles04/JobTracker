@@ -8,18 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-//builder.Services.AddDbContext<JobTrackerContext>(
-//    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-//builder.Services.AddDbContext<JobTrackerIdentityContext>(
-//    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddDbContext<JobTrackerContext>(
-    options => options.UseInMemoryDatabase("AppDb"));
-builder.Services.AddDbContext<JobTrackerIdentityContext>(
-    options => options.UseInMemoryDatabase("AppDb"));
+   options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// builder.Services.AddDbContext<JobTrackerContext>(
+//     options => options.UseInMemoryDatabase("AppDb"));
 
 builder.Services.AddIdentityApiEndpoints<IdentityUser>()
-    .AddEntityFrameworkStores<JobTrackerIdentityContext>();
+    .AddEntityFrameworkStores<JobTrackerContext>();
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<JobService>();

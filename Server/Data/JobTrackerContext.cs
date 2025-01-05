@@ -1,21 +1,25 @@
 ﻿using JobTracker.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace JobTracker.Data
 {
-    public class JobTrackerContext : DbContext
+    public class JobTrackerContext : IdentityDbContext<IdentityUser>
     {
         public JobTrackerContext(DbContextOptions<JobTrackerContext> options) : base(options) { }
 
-        public DbSet<Employee> Employees { get; set; }
-        public DbSet<Job> Jobs { get; set; }
-        public DbSet<Tool> Tools { get; set; }
+        public required DbSet<Employee> Employees { get; set; }
+        public required DbSet<Job> Jobs { get; set; }
+        public required DbSet<Tool> Tools { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Job>()
                 .HasOne(j => j.ProjectManager)
-                .WithMany() // No navigation in Employee back to Jobs as ProjectManager
+                .WithMany()
                 .HasForeignKey(j => j.ProjectManagerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -24,7 +28,6 @@ namespace JobTracker.Data
                 .WithMany(e => e.Jobs)
                 .UsingEntity(j => j.ToTable("EmployeeJobs"));
 
-            base.OnModelCreating(modelBuilder);
         }
     }
 }
