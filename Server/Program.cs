@@ -1,4 +1,5 @@
 using JobTracker.Data;
+using JobTracker.Models;
 using JobTracker.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,19 +9,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+//builder.Services.AddDbContext<JobTrackerContext>(
+//   options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddDbContext<JobTrackerContext>(
-   options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options => options.UseInMemoryDatabase("AppDb"));
 
-// builder.Services.AddDbContext<JobTrackerContext>(
-//     options => options.UseInMemoryDatabase("AppDb"));
-
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
     .AddEntityFrameworkStores<JobTrackerContext>();
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<JobService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<ToolService>();
+builder.Services.AddScoped<UserService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -28,6 +28,12 @@ namespace JobTracker.Data
                 .WithMany(e => e.Jobs)
                 .UsingEntity(j => j.ToTable("EmployeeJobs"));
 
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(u => u.Employee)
+                .WithOne(e => e.User)
+                .HasForeignKey<ApplicationUser>(u => u.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

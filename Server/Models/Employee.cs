@@ -5,11 +5,12 @@ namespace JobTracker.Models
     public class Employee
     {
         [Key]
-        public long Id {  get; set; }
+        public long Id { get; set; }
         public required string Name { get; set; }
-        public required string Title {  get; set; }
+        public required string Title { get; set; }
         public required decimal PayRate { get; set; }
         public ICollection<Job>? Jobs { get; set; }
+        public ApplicationUser? User { get; set; }
     }
 
     public class EmployeeDTO

@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using JobTracker.Models;
 using JobTracker.Services;
-using Microsoft.AspNetCore.Authorization;
 
 namespace JobTracker.Controllers
 {
